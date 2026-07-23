@@ -31,6 +31,10 @@
 
 * { box-sizing: border-box; }
 
+/* The `hidden` attribute is only `display:none` in the UA stylesheet, so any
+   author rule setting `display` on the same element silently overrides it. */
+[hidden] { display: none !important; }
+
 html, body {
   margin: 0;
   background: var(--bg);
