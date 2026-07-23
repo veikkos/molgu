@@ -143,7 +143,13 @@ function normalize(s) {
 
 /* ---------- history ---------- */
 
-function commit(mutate) {
+/**
+ * `rerender: false` updates state and storage but leaves the player list DOM
+ * alone. Needed for the rename field: it commits on blur, and rebuilding the
+ * list mid-click destroys the button being pressed before `mouseup`, so the
+ * click never lands. Callers that pass it must patch the affected DOM.
+ */
+function commit(mutate, { rerender = true } = {}) {
   const next = clone(H.present);
   mutate(next);
   normalize(next);
@@ -152,7 +158,7 @@ function commit(mutate) {
   H.present = next;
   H.future = [];
   save();
-  render();
+  if (rerender) render();
 }
 
 function undo() {
@@ -181,10 +187,11 @@ const removePlayer = (id) => commit((s) => {
   s.players = s.players.filter((p) => p.id !== id);
 });
 
+// Rebuilding the list here would swallow the click that caused the blur.
 const renamePlayer = (id, name) => commit((s) => {
   const p = s.players.find((x) => x.id === id);
   if (p) p.name = name;
-});
+}, { rerender: false });
 
 const movePlayer = (id, dir) => commit((s) => {
   const i = s.players.findIndex((p) => p.id === id);
@@ -321,8 +328,6 @@ function renderPlayers(s, st) {
   list.innerHTML = s.players.length
     ? s.players.map((p, i) => playerHTML(p, s, st, i)).join('')
     : '<li class="empty">No players yet. Add the first one below — the order here is the throwing order, top to bottom.</li>';
-  // Keep the newest throws visible.
-  for (const strip of list.querySelectorAll('.throws')) strip.scrollLeft = strip.scrollWidth;
 }
 
 const ordinal = (n) => n + (['th', 'st', 'nd', 'rd'][(n % 100 - 20) % 10] || ['th', 'st', 'nd', 'rd'][n % 100] || 'th');
@@ -348,14 +353,21 @@ function renderBanner(s, st) {
   $('#bannerNew').addEventListener('click', startNewGame);
 }
 
-function render() {
+/** Everything outside the player list -- safe to refresh mid-interaction. */
+function renderChrome() {
   const s = H.present;
   const st = compute(s);
   $('#undo').disabled = !H.past.length;
   $('#redo').disabled = !H.future.length;
   renderTurn(s, st);
-  renderPlayers(s, st);
   renderBanner(s, st);
+}
+
+function render() {
+  const s = H.present;
+  const st = compute(s);
+  renderChrome();
+  renderPlayers(s, st);
 }
 
 /* ---------- throw editor ---------- */
@@ -419,10 +431,15 @@ $('#players').addEventListener('click', (e) => {
 $('#players').addEventListener('change', (e) => {
   const input = e.target.closest('[data-act="rename"]');
   if (!input) return;
-  const id = input.closest('.player').dataset.id;
+  const li = input.closest('.player');
+  const id = li.dataset.id;
   const name = input.value.trim();
-  if (name) renamePlayer(id, name);
-  else render();
+  const player = H.present.players.find((p) => p.id === id);
+  if (!player) return;
+  if (!name) { input.value = player.name; return; }   // reject a blank name
+  renamePlayer(id, name);
+  li.querySelector('.pname').textContent = name;      // patch in place
+  renderChrome();
 });
 
 $('#editPad').addEventListener('click', (e) => {

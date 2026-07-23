@@ -82,7 +82,7 @@ main {
   padding: 1rem max(.8rem, env(safe-area-inset-left)) 5rem max(.8rem, env(safe-area-inset-right));
   display: grid;
   gap: 1rem;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .panel {
@@ -94,7 +94,7 @@ main {
 }
 
 @media (min-width: 820px) {
-  main { grid-template-columns: 1.15fr .85fr; align-items: start; }
+  main { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: start; }
   .players-panel { grid-column: 1; grid-row: 1; }
   .pad-panel { grid-column: 2; grid-row: 1; position: sticky; top: 4.2rem; }
 }
@@ -130,7 +130,12 @@ kbd {
 }
 
 /* ---------- players ---------- */
-.players { list-style: none; margin: 0 0 .75rem; padding: 0; display: grid; gap: .5rem; }
+/* minmax(0,1fr) rather than the default `auto`: grid items refuse to shrink
+   below their content, so a long row of throws would stretch the whole page. */
+.players {
+  list-style: none; margin: 0 0 .75rem; padding: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: .5rem;
+}
 
 .player {
   border: 1px solid var(--line);
@@ -143,9 +148,9 @@ kbd {
 .player.out { opacity: .62; }
 .player.won { border-left-color: var(--warn); }
 
-.phead { display: flex; align-items: center; gap: .5rem; }
+.phead { display: flex; align-items: center; gap: .5rem; min-width: 0; }
 .pos { color: var(--muted); font-size: .8rem; min-width: 1.1em; font-variant-numeric: tabular-nums; }
-.pname { flex: 1; font-weight: 600; overflow-wrap: anywhere; }
+.pname { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
 .pscore { font-size: 1.35rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .badge {
   font-size: .68rem; text-transform: uppercase; letter-spacing: .06em;
@@ -156,8 +161,7 @@ kbd {
 .badge.miss { color: var(--muted); }
 
 .throws {
-  display: flex; gap: .3rem; margin-top: .45rem;
-  overflow-x: auto; padding-bottom: .2rem; scrollbar-width: thin;
+  display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .45rem; min-width: 0;
 }
 .chip {
   flex: 0 0 auto;
