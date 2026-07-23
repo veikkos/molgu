@@ -68,7 +68,8 @@ function computePlayer(player, cfg) {
     }
     if (pins === 0) {
       misses++;
-      if (misses >= cfg.maxMisses) eliminated = true;
+      // maxMisses <= 0 disables elimination entirely (unlimited misses).
+      if (cfg.maxMisses > 0 && misses >= cfg.maxMisses) eliminated = true;
     } else {
       misses = 0;
       score += pins;
@@ -271,7 +272,7 @@ function renderTurn(s, st) {
     const place = st.winners.length ? `Playing for ${ordinal(st.winners.length + 1)} place` : 'Now throwing';
     info.innerHTML = `<div class="turn-label">${place}</div>
       <div class="turn-name">${esc(current.name)}</div>
-      <div class="turn-sub">Score <b>${d.score}</b> · needs <b>${left}</b>${d.misses ? ` · <b>${d.misses}</b>/${s.config.maxMisses} misses` : ''}</div>`;
+      <div class="turn-sub">Score <b>${d.score}</b> · needs <b>${left}</b>${d.misses ? ` · <b>${d.misses}</b>${s.config.maxMisses > 0 ? `/${s.config.maxMisses}` : ''} misses` : ''}</div>`;
   }
 
   pad.innerHTML = padHTML(null);

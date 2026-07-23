@@ -229,6 +229,7 @@ kbd {
 .dlg-actions { display: flex; gap: .5rem; justify-content: flex-end; margin: 1rem 0 0; padding: 0; }
 .dlg-actions.wrap { flex-wrap: wrap; }
 .field { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-bottom: .6rem; }
+.field small { color: var(--muted); font-weight: 400; }
 .field input {
   width: 6rem; padding: .45rem .55rem; text-align: right;
   border: 1px solid var(--line); border-radius: 9px; background: var(--bg);
