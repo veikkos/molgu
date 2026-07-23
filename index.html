@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mölgu</title>
+<meta name="theme-color" content="#146b4f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8E%B3%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Mölgu</h1>
+  <div class="tools">
+    <button id="undo" class="icon" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+    <button id="redo" class="icon" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
+    <button id="settingsBtn" class="icon" title="Settings" aria-label="Settings">⚙</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel pad-panel">
+    <div id="turnInfo" class="turn-info"></div>
+    <div id="pad" class="pad"></div>
+    <p class="hint">Keys <kbd>1</kbd>–<kbd>9</kbd> score, <kbd>0</kbd> = miss. Tap any past throw to correct it.</p>
+  </section>
+
+  <section class="panel players-panel">
+    <ol id="players" class="players"></ol>
+    <form id="addPlayer" class="add-player">
+      <input id="newName" type="text" placeholder="Add player…" autocomplete="off" maxlength="24" aria-label="New player name">
+      <button type="submit" class="btn">Add</button>
+    </form>
+  </section>
+</main>
+
+<div id="banner" class="banner" aria-live="polite"></div>
+
+<dialog id="editDlg" class="dlg">
+  <h2 id="editTitle">Edit throw</h2>
+  <div id="editPad" class="pad"></div>
+  <menu class="dlg-actions">
+    <button id="editDelete" class="btn danger" type="button">Delete throw</button>
+    <button id="editCancel" class="btn ghost" type="button">Cancel</button>
+  </menu>
+</dialog>
+
+<dialog id="settingsDlg" class="dlg">
+  <h2>Settings</h2>
+  <label class="field">
+    <span>Target score</span>
+    <input id="cfgTarget" type="number" min="1" max="999" step="1">
+  </label>
+  <label class="field">
+    <span>Score after overshooting</span>
+    <input id="cfgResetTo" type="number" min="0" max="999" step="1">
+  </label>
+  <label class="field">
+    <span>Misses until elimination</span>
+    <input id="cfgMisses" type="number" min="1" max="10" step="1">
+  </label>
+  <p class="note">Scores are recalculated from the full throw history, so changing these is safe at any point — and undoable.</p>
+  <menu class="dlg-actions wrap">
+    <button id="newGame" class="btn" type="button">New game (keep players)</button>
+    <button id="clearAll" class="btn danger" type="button">Clear everything</button>
+    <button id="settingsClose" class="btn ghost" type="button">Close</button>
+  </menu>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
