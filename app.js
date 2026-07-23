@@ -471,6 +471,8 @@ $('#settingsBtn').addEventListener('click', () => {
   $('#cfgResetTo').value = c.resetTo;
   $('#cfgMisses').value = c.maxMisses;
   $('#settingsDlg').showModal();
+  // Keep focus off the number inputs so Android doesn't raise the keyboard.
+  $('#settingsClose').focus({ preventScroll: true });
 });
 
 $('#settingsClose').addEventListener('click', () => $('#settingsDlg').close());
