@@ -58,7 +58,7 @@ const openDrawers = new Set();
 /* ---------- scoring ---------- */
 
 function computePlayer(player, cfg) {
-  let score = 0, misses = 0, eliminated = false, won = false;
+  let score = 0, misses = 0, eliminated = false, won = false, wonAt = null;
   const rows = [];
   for (const pins of player.throws) {
     if (eliminated || won) {
@@ -73,18 +73,27 @@ function computePlayer(player, cfg) {
       misses = 0;
       score += pins;
       if (score > cfg.target) score = cfg.resetTo;
-      else if (score === cfg.target) won = true;
+      else if (score === cfg.target) { won = true; wonAt = rows.length; }
     }
     rows.push({ pins, score, misses, eliminated, won, void: false });
   }
-  return { score, misses, eliminated, won, rows };
+  return { score, misses, eliminated, won, wonAt, rows };
 }
 
 function compute(s) {
   const byId = {};
   for (const p of s.players) byId[p.id] = computePlayer(p, s.config);
 
-  const winners = s.players.filter((p) => byId[p.id].won);
+  // In finishing order, not list order. There is no global clock in the data
+  // model, so order by which throw sealed the win (everyone throws once per
+  // round, so a lower index means an earlier round) and break ties by
+  // throwing order. Exact for a normal rotation.
+  const winners = s.players
+    .map((p, i) => ({ p, i, at: byId[p.id].wonAt }))
+    .filter((x) => x.at !== null)
+    .sort((a, b) => a.at - b.at || a.i - b.i)
+    .map((x) => x.p);
+
   const alive = s.players.filter((p) => !byId[p.id].eliminated);
   const active = alive.filter((p) => !byId[p.id].won);   // can still throw
 
