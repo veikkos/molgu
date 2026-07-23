@@ -109,7 +109,13 @@ function compute(s) {
   // whether the banner still owes the room an announcement.
   const pending = winners.length + (lastStanding ? 1 : 0);
 
-  return { byId, winners, winner: winners[0] || lastStanding, lastStanding, alive, active, over, pending };
+  // Placement, 1-based, in finishing order. A last-one-standing survivor
+  // takes the next place after everyone who reached the target.
+  const placeOf = {};
+  winners.forEach((p, i) => { placeOf[p.id] = i + 1; });
+  if (lastStanding) placeOf[lastStanding.id] = winners.length + 1;
+
+  return { byId, winners, winner: winners[0] || lastStanding, lastStanding, alive, active, over, pending, placeOf };
 }
 
 const isActive = (p, st) => !st.byId[p.id].eliminated && !st.byId[p.id].won;
@@ -283,7 +289,8 @@ function playerHTML(p, s, st, idx) {
   ].filter(Boolean).join(' ');
 
   let badges = '';
-  if (d.won) badges += '<span class="badge won">winner</span>';
+  const place = st.placeOf[p.id];
+  if (place) badges += `<span class="badge won">${place === 1 ? '🏆 ' : ''}${ordinal(place)}</span>`;
   if (d.eliminated) badges += '<span class="badge out">out</span>';
   else if (d.misses) badges += `<span class="badge miss">${'•'.repeat(d.misses)} miss</span>`;
 
